@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Socially | Analytics Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: #fff;
+            min-height: 100vh;
+            padding: 30px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 600;
+            font-size: 2.5rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        h1 span {
+            color: #00e5ff;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 25px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .card h2 {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: #00e5ff;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        th,
+        td {
+            padding: 12px 10px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        th {
+            color: #a0a5aa;
+            font-weight: 400;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transition: 0.3s;
+        }
+
+        .highlight {
+            color: #00e5ff;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            margin-bottom: 5px;
+            color: #ccc;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            background: rgba(0, 0, 0, 0.2);
+            color: white;
+            outline: none;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: #00e5ff;
+            color: #0f2027;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.1s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background: #00c4db;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        #search-message {
+            margin-top: 10px;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
+        /* Special styling for the active user profile */
+        #userProfileCard {
+            display: none;
+            border-color: #00e5ff;
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.2);
+            margin-bottom: 25px;
+        }
+
+        .profile-stats {
+            color: #ccc;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+        }
+
+        @media (max-width: 800px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Socially <span>Analytics</span></h1>
+
+    <div class="dashboard-grid">
+
+        <div class="left-column">
+
+            <div class="card">
+                <h2>🔍 Search User</h2>
+                <div class="form-group">
+                    <input type="text" id="searchUsername" placeholder="e.g., @user1">
+                </div>
+                <button onclick="searchUser()">Search Profile & Posts</button>
+                <div id="search-message"></div>
+            </div>
+
+            <div class="card" style="margin-top: 25px;">
+                <h2>👤 Add New User</h2>
+                <form id="createUserForm">
+                    <div class="form-group"><input type="number" id="userId" required placeholder="User ID (e.g., 200)">
+                    </div>
+                    <div class="form-group"><input type="text" id="username" required
+                            placeholder="Username (e.g., @newuser)"></div>
+                    <div class="form-group"><input type="text" id="country" required
+                            placeholder="Country (e.g., Brazil)"></div>
+                    <button type="submit">Create User</button>
+                    <div id="form-message" style="margin-top: 10px; font-size: 0.85rem; text-align: center;"></div>
+                </form>
+            </div>
+
+            <div class="card" style="margin-top: 25px;">
+                <h2>#️⃣ Top Hashtags</h2>
+                <table>
+                    <tbody id="hashtags-body">
+                        <tr>
+                            <td>Loading...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+        <div class="right-column">
+
+            <div class="card" id="userProfileCard">
+                <h2 id="profileName">👤 User Profile</h2>
+                <div class="profile-stats" id="profileStats"></div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Post ID</th>
+                            <th>Content</th>
+                            <th>Hashtags</th>
+                        </tr>
+                    </thead>
+                    <tbody id="user-posts-body"></tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <h2>🔥 Trending Posts (> 300 Engagement)</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Username</th>
+                            <th>Content</th>
+                            <th>Engagement</th>
+                        </tr>
+                    </thead>
+                    <tbody id="posts-body">
+                        <tr>
+                            <td colspan="4">Loading...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card" style="margin-top: 25px;">
+                <h2>🌍 Engagement by Country</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Country</th>
+                            <th>Total Likes</th>
+                            <th>Comments</th>
+                            <th>Shares</th>
+                        </tr>
+                    </thead>
+                    <tbody id="country-body">
+                        <tr>
+                            <td colspan="4">Loading...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+
+        async function loadTopPosts() {
+            try {
+                const res = await fetch(`${API_URL}/top-posts`);
+                const data = await res.json();
+                document.getElementById('posts-body').innerHTML = data.map(p => `
+          <tr><td>${p.POST_ID}</td><td>${p.USERNAME}</td><td>${p.CONTENT}</td><td class="highlight">${p.TOTAL_ENGAGEMENT}</td></tr>
+        `).join('');
+            } catch (err) { }
+        }
+
+        async function loadHashtags() {
+            try {
+                const res = await fetch(`${API_URL}/hashtags`);
+                const data = await res.json();
+                document.getElementById('hashtags-body').innerHTML = data.map(t => `
+          <tr><td>${t.HASHTAGS}</td><td class="highlight">${Math.round(t.AVG_LIKES)} likes</td></tr>
+        `).join('');
+            } catch (err) { }
+        }
+
+        async function loadCountries() {
+            try {
+                const res = await fetch(`${API_URL}/countries`);
+                const data = await res.json();
+                document.getElementById('country-body').innerHTML = data.map(c => `
+          <tr><td><strong>${c.COUNTRY}</strong></td><td class="highlight">${c.TOTAL_LIKES}</td><td>${c.TOTAL_COMMENTS}</td><td>${c.TOTAL_SHARES}</td></tr>
+        `).join('');
+            } catch (err) { }
+        }
+
+        // SEARCH USER FUNCTION
+        async function searchUser() {
+            const usernameInput = document.getElementById('searchUsername').value.trim();
+            const msgDiv = document.getElementById('search-message');
+            const profileCard = document.getElementById('userProfileCard');
+
+            if (!usernameInput) {
+                msgDiv.innerText = "Please enter a username";
+                msgDiv.style.color = "#ff4d4d";
+                return;
+            }
+
+            msgDiv.innerText = "Searching...";
+            msgDiv.style.color = "#ccc";
+
+            try {
+                // 1. Get user details
+                const userRes = await fetch(`${API_URL}/users/${encodeURIComponent(usernameInput)}`);
+                if (!userRes.ok) throw new Error("User not found!");
+                const userData = await userRes.json();
+
+                // 2. Get user's posts
+                const postsRes = await fetch(`${API_URL}/users/${userData.USER_ID}/posts`);
+                const postsData = await postsRes.json();
+
+                // 3. Display the Profile Card
+                msgDiv.innerText = "";
+                profileCard.style.display = "block"; // Make the hidden card appear!
+                document.getElementById('profileName').innerText = `👤 ${userData.USERNAME}`;
+                document.getElementById('profileStats').innerHTML = `<strong>Country:</strong> ${userData.COUNTRY} &nbsp;|&nbsp; <strong>Total Posts:</strong> ${userData.TOTAL_POSTS}`;
+
+                const tbody = document.getElementById('user-posts-body');
+                if (postsData.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="3">This user has no posts yet.</td></tr>';
+                } else {
+                    tbody.innerHTML = postsData.map(post => `
+            <tr>
+              <td>${post.POST_ID}</td>
+              <td>${post.CONTENT}</td>
+              <td class="highlight">${post.HASHTAGS || 'No tags'}</td>
+            </tr>
+          `).join('');
+                }
+            } catch (err) {
+                msgDiv.innerText = err.message;
+                msgDiv.style.color = "#ff4d4d";
+                profileCard.style.display = "none"; // Hide card if error
+            }
+        }
+
+        // CREATE USER FUNCTION
+        document.getElementById('createUserForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const msgDiv = document.getElementById('form-message');
+            msgDiv.style.color = '#ccc'; msgDiv.innerText = 'Creating user...';
+
+            const payload = {
+                user_id: document.getElementById('userId').value,
+                username: document.getElementById('username').value,
+                country: document.getElementById('country').value
+            };
+
+            try {
+                const res = await fetch(`${API_URL}/users`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+                });
+                const result = await res.json();
+                if (res.ok) {
+                    msgDiv.style.color = '#00ff88'; msgDiv.innerText = 'User created!';
+                    document.getElementById('createUserForm').reset();
+                } else { msgDiv.style.color = '#ff4d4d'; msgDiv.innerText = 'Error: ' + result.error; }
+            } catch (err) { msgDiv.style.color = '#ff4d4d'; msgDiv.innerText = 'Server error.'; }
+        });
+
+        loadTopPosts(); loadHashtags(); loadCountries();
+    </script>
+</body>
+
+</html>
